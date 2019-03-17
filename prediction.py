@@ -19,7 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class prediction(nn.Module):
 	def __init__(self, input_dim, output_dim):
-		 """ Init Predicter.
+		""" Init Predicter.
 
         @param 
         """

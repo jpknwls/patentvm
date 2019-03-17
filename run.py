@@ -26,10 +26,10 @@ EOS_token = 1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class Lang:
-    def __init__(self, name):
-       """ Init Language.
+class Lang():
 
+    def __init__(self, name):
+        """ Init Language.
         @param name (string): the name of the language
         """
         self.name = name
@@ -65,7 +65,7 @@ class Lang:
 patent_data = np.load('../data/patent_fuller.npy')
 
 def prepare_train(p_data):
-     """ Prepares the language and data for training
+    """ Prepares the language and data for training
     @param p_data (list): list of patent documents from file
 
     returns data: list of documents to train
