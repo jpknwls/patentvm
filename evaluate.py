@@ -38,7 +38,20 @@ def get_vectors(doc, glove):
 def avg_vecs(vecs): return np.mean(vecs, axis=0)
 def max_vecs(vecs): return np.maximum.reduce(vecs)
 
+
+def get_avg_glove(patent,docs, glove):
+    return avg_vecs(get_vectors(docs[patent][-MAX_LENGTH:], glove))
+
+def get_max_glove(patent,docs, glove):
+    return max_vecs(get_vectors(docs[patent][-MAX_LENGTH:], glove))
+          
+
+
+
 """ ------------------------------------------------------------ """
+
+
+""" -------------------- HELPER FUNCTIONS --------------------  """
 
 
 def cos_sim(d1, d2):
@@ -80,12 +93,10 @@ def get_citations(patent, data):
         if d['id'] == patent:
             return d['citations']
 
-def get_avg_glove(patent,docs, glove):
-    return avg_vecs(get_vectors(docs[patent][-MAX_LENGTH:], glove))
 
-def get_max_glove(patent,docs, glove):
-    return max_vecs(get_vectors(docs[patent][-MAX_LENGTH:], glove))
-          
+""" ------------------------------------------------------------ """
+
+
 
 def evaluate(data, patents, all_patents, docs, doc_txt, k):
 

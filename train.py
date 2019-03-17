@@ -85,6 +85,9 @@ def tensorsFromInput(pair, lang):
 """ ------------------------------------------------------------ """
 
 
+""" ------------------------ ENCODER --------------------------  """
+
+
 def train(input_tensor, target_tensor, encoder, decoder, e_optimizer, d_optimizer, criterion, max_length=MAX_LENGTH, verbose=False):
     """ Trains a forward pass over autoencoder network
 
@@ -202,6 +205,15 @@ def trainIters(data, encoder, decoder, n_iters, lang,  print_every=100, plot_eve
     # save the encoder model
     torch.save(encoder, 'model/encoder2')
 
+
+""" ------------------------------------------------------------ """
+
+
+
+
+""" ------------------------ PREDICTION --------------------------  """
+
+
 def _train(input_tensor1, input_tensor2, target, optimizer, predicter, criterion):
     """ Trains a forward pass over predicter network
 
@@ -255,3 +267,5 @@ def trainPrediction(data, predicter, n_iters, print_every=100, learning_rate=0.0
 
     torch.save(predicter, 'model/predicter')
     
+
+""" ------------------------------------------------------------ """
