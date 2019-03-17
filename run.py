@@ -19,7 +19,7 @@ import random
 from autoencoder import encoder, decoder
 from train import trainIters
 
-MAX_LENGTH  = 100
+MAX_LENGTH  = 1000
 SOS_token = 0
 EOS_token = 1
 
