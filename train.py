@@ -8,6 +8,7 @@ John Knowles <jkn0wles@stanfordedu>
 Sam Premutico <samprem@stanford.edu>
 """
 import random
+import numpy as np
 import time
 import torch
 import torch.nn as nn
@@ -23,13 +24,13 @@ teacher_forcing_ratio = 0.5
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 print(device)
+
 """ -------------------- HELPER FUNCTIONS --------------------  """
 
 def asMinutes(s):
     m = math.floor(s / 60)
     s -= m * 60
     return '%dm %ds' % (m, s)
-
 
 def timeSince(since, percent):
     print(since, percent)
@@ -38,10 +39,6 @@ def timeSince(since, percent):
     es = s / (percent)
     rs = es - s
     return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
-
-""" ------------------------------------------------------------ """
-
-
 
 def indexesFromDocument(lang, document):
     """ Gets the index of each word in the document.
@@ -55,8 +52,8 @@ def indexesFromDocument(lang, document):
     """
     return [lang.word2idx[word] for word in document]
 
-
 def tensorFromDocument(lang, document):
+    
     """ Creates a tensor from a list of integers
     
     Code edited from: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
@@ -66,6 +63,8 @@ def tensorFromDocument(lang, document):
 
     returns: torch tensor of integers
     """
+
+
     indexes = indexesFromDocument(lang, document)
     indexes.append(1)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
@@ -82,6 +81,8 @@ def tensorsFromInput(pair, lang):
     """
     input_tensor = tensorFromDocument(lang, pair)
     return (input_tensor, input_tensor)
+
+""" ------------------------------------------------------------ """
 
 
 def train(input_tensor, target_tensor, encoder, decoder, e_optimizer, d_optimizer, criterion, max_length=MAX_LENGTH, verbose=False):
@@ -142,12 +143,15 @@ def train(input_tensor, target_tensor, encoder, decoder, e_optimizer, d_optimize
     if (verbose): print('decoded')
 
     loss.backward()
+
     if (verbose): print('loss')
+
     e_optimizer.step()
     d_optimizer.step()
-    if (verbose): print('optimize')
-    return loss.item() / target_length
 
+    if (verbose): print('optimize')
+
+    return loss.item() / target_length
 
 def trainIters(data, encoder, decoder, n_iters, lang,  print_every=100, plot_every=100, learning_rate=0.01):
     """ Trains a encoder-decoder network over n_iters
@@ -197,3 +201,57 @@ def trainIters(data, encoder, decoder, n_iters, lang,  print_every=100, plot_eve
 
     # save the encoder model
     torch.save(encoder, 'model/encoder2')
+
+def _train(input_tensor1, input_tensor2, target, optimizer, predicter, criterion):
+    """ Trains a forward pass over predicter network
+
+    @param 
+
+    returns: loss of forward pass through network
+    """    
+    optimizer.zero_grad()
+
+    prediction = predicter(input_tensor1, input_tensor2)
+
+    print(prediction, target)
+    loss = criterion(prediction, target)
+
+    loss.backward()
+    
+    optimizer.step()
+
+    return loss
+
+def trainPrediction(data, predicter, n_iters, print_every=100, learning_rate=0.005): 
+    """ Trains a predicter network over n_iters
+
+    @param 
+
+    """  
+    optimizer = optim.SGD(predicter.parameters(), lr=learning_rate)
+    
+    criterion = nn.BCELoss()
+    print_loss_total = 0 
+
+    #print(data)
+    training_pairs = [random.choice(data) for _ in range(n_iters)]
+
+    for iter in range(1, n_iters + 1):
+        training_item = training_pairs[iter - 1]
+        input_tensor1 = training_item[0]
+        input_tensor2 = training_item[1]
+        target = torch.tensor(training_item[2], dtype=torch.float)
+
+        loss = _train(input_tensor1, input_tensor2, target, optimizer, predicter, criterion)
+
+        print_loss_total += loss 
+
+        if iter % print_every == 0:
+            print_loss_avg = print_loss_total / print_every
+            print_loss_total = 0
+            print(iter)
+
+
+
+    torch.save(predicter, 'model/predicter')
+    

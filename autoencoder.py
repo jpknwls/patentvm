@@ -35,18 +35,16 @@ class encoder(nn.Module):
     def forward(self, input, hidden):
         """ Forward pass of encoder
 
-        @param input: tensor of integers, shape (c, batch)
+        @param input: tensor of integers
         @param hidden: internal state of the RNN before reading the input characters. 
-        A tuple of two tensors of shape (1, batch, hidden_size)
 
         @returns output: 
         @returns hidden: internal state of the RNN after reading the input characters. 
-        A tuple of two tensors of shape (1, batch, hidden_size)
         """
-       # print("INPUT", input.size, "HIDDEN", hidden.size)
+        #print("INPUT", input.size, "HIDDEN", hidden.size)
         embedded = self.embedding(input).view(1, 1, -1)
         #output, hidden = self.cell(output, hidden)
-    	#print("output", output.size, "HIDDEN", hidden.size)
+        #print("output", output.size, "HIDDEN", hidden.size)
         return self.cell(embedded, hidden) # output, hidden
 
     def initHidden(self):
@@ -76,13 +74,10 @@ class decoder(nn.Module):
         """ Forward pass of decoder
 
         @param input: tensor of integers,
-         shape (c, batch)
         @param hidden: internal state of the RNN before reading the input characters. 
-        A tuple of two tensors of shape (1, batch, hidden_size)
 
         @returns output: 
         @returns hidden: internal state of the RNN after reading the input characters. 
-        A tuple of two tensors of shape (1, batch, hidden_size)
         """
        	#print("INPUT", input.size, "HIDDEN", hidden.size)
         embed = F.relu(self.embedding(input).view(1, 1, -1))

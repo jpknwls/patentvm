@@ -17,26 +17,25 @@ import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class prediction(nn.Module):
-	def __init__(self, input_dim, output_dim):
-		""" Init Predicter.
+class predicter(nn.Module):
+
+    def __init__(self, input_dim, output_dim):
+        """ Init Predicter.
 
         @param 
         """
-		super(prediction, self).__init__()
-	    self.features = nn.Sequential(
-            nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-        )
-        self.predict == nn.Sequential(
-            # linear layer
-            # sigmoid?
+        super(predicter, self).__init__()
+        self.features = nn.Sequential(nn.Conv1d(1, 1, kernel_size=3, stride=1, padding=1), nn.ReLU(inplace=True))
+        self.predict = nn.Sequential(
+            nn.Conv1d(2, 1, kernel_size=3, stride=1, padding=1),
             nn.Linear(input_dim, output_dim),
-            nn.Sigmoid()
-        )
+            nn.Sigmoid(),)
 
 
-    def forward(self, patent,p_citation ):
+
+
+
+    def forward(self, patent, p_citation):
         """ Forward pass of predicter
 
         @param patent: tensor of integers
@@ -48,7 +47,7 @@ class prediction(nn.Module):
         p = self.features(patent)
         c = self.features(p_citation)
         x = torch.cat((p, c), 1)
-        prediction = self.predict(x)
+        prediction = self.predict(x).squeeze(0).squeeze(0).squeeze(0)
 
         return prediction
 
