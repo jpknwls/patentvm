@@ -7,17 +7,22 @@ train.py: Train File
 John Knowles <jkn0wles@stanfordedu>
 Sam Premutico <samprem@stanford.edu>
 """
-
+import random
+import time
 import torch
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
 
 
-MAX_LENGTH  = 30000
+MAX_LENGTH  = 100
+SOS_token = 0
+EOS_token = 1
+
 teacher_forcing_ratio = 0.5
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-
+print(device)
 """ -------------------- HELPER FUNCTIONS --------------------  """
 
 def asMinutes(s):
@@ -111,11 +116,11 @@ def train(input_tensor, target_tensor, encoder, decoder, e_optimizer, d_optimize
             input_tensor[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0, 0]
     if (verbose): print('encoded')
-    decoder_input = torch.tensor([[SOS_token]], device=device)
+    decoder_input = torch.tensor([[0]], device=device)
 
     decoder_hidden = encoder_hidden
-
-    use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
+    use_teacher_forcing = True
+    #use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
     if use_teacher_forcing:
         # Teacher forcing: Feed the target as the next input
@@ -138,8 +143,8 @@ def train(input_tensor, target_tensor, encoder, decoder, e_optimizer, d_optimize
 
     loss.backward()
     if (verbose): print('loss')
-    encoder_optimizer.step()
-    decoder_optimizer.step()
+    e_optimizer.step()
+    d_optimizer.step()
     if (verbose): print('optimize')
     return loss.item() / target_length
 
@@ -168,6 +173,8 @@ def trainIters(data, encoder, decoder, n_iters, lang,  print_every=100, plot_eve
     criterion = nn.NLLLoss()
 
     for iter in range(1, n_iters + 1):
+        #print(iter)
+
         training_pair = training_pairs[iter - 1]
         input_tensor = training_pair[0]
         target_tensor = training_pair[1]
@@ -189,4 +196,4 @@ def trainIters(data, encoder, decoder, n_iters, lang,  print_every=100, plot_eve
             plot_loss_total = 0
 
     # save the encoder model
-    torch.save(encoder, 'model/encoder')
+    torch.save(encoder, 'model/encoder2')

@@ -19,12 +19,12 @@ import random
 from autoencoder import encoder, decoder
 from train import trainIters
 
-MAX_LENGTH  = 30000
+MAX_LENGTH  = 100
 SOS_token = 0
 EOS_token = 1
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 
 class Lang():
 
@@ -51,7 +51,7 @@ class Lang():
 
         @param document (string): word to add to language
         """
-        if word not in self.word2index:
+        if word not in self.word2idx:
             self.word2idx[word] = self.n_words
             self.word2count[word] = 1
             self.idx2word[self.n_words] = word
@@ -62,7 +62,7 @@ class Lang():
 
 
 
-patent_data = np.load('../data/patent_fuller.npy')
+patent_data = np.load('data/patent_fuller156.npy')
 
 def prepare_train(p_data):
     """ Prepares the language and data for training
@@ -74,8 +74,8 @@ def prepare_train(p_data):
     vocab = Lang('corpus')
     data = []
     for doc in p_data:
-        vocab.addDocument(doc['content'][-100:])
-        data.append(doc['content'][-100:])
+        vocab.addDocument(doc['content'][-MAX_LENGTH+1:])
+        data.append(doc['content'][-MAX_LENGTH+1:])
     return data, vocab
 
 
@@ -87,7 +87,7 @@ encoder1 = encoder(n_words, hidden_size).to(device)
 attn_decoder1 = decoder(hidden_size, n_words).to(device)
 
 
-trainIters(data, encoder1, attn_decoder1, 1000, vocab)
+trainIters(data, encoder1, attn_decoder1, 100000, vocab)
 
 
 
