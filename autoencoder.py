@@ -24,10 +24,10 @@ class encoder(nn.Module):
         @param input_size (int): size of the vocab (for embedding)
         @param hidden_size (int): hidden size of the rnn cell
         """
-			super(encoder, self).__init__()
-			self.hidden_size = hidden_size
-        	self.embedding = nn.Embedding(input_size, hidden_size)
-        	self.cell = nn.GRU(hidden_size, hidden_size) # EXTENSION: add LSTM cell
+		super(encoder, self).__init__()
+		self.hidden_size = hidden_size
+    	self.embedding = nn.Embedding(input_size, hidden_size)
+    	self.cell = nn.GRU(hidden_size, hidden_size) # EXTENSION: add LSTM cell
 
 
     def forward(self, input, hidden):
