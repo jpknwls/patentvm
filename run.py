@@ -74,25 +74,33 @@ test = patent_data[split:]
 
 """ -------------------- HELPER FUNCTIONS --------------------  """
 
+def prepare_vocab(data):
+    vocab = Lang('corpus')
+    for doc in data:
+        vocab.addDocument(doc['content'][-MAX_LENGTH+1:])
+    return vocab
 
-def prepare_train(p_data):
-    """ Prepares the language and data for training
+def prepare_autoencoder_train(p_data):
+    """ Prepares the language and data for training on autoencoder network
     @param p_data (list): list of patent documents from file
 
     returns data: list of documents to train
     returns vocab: language
     """
-    vocab = Lang('corpus')
     data = []
     for doc in p_data:
-        vocab.addDocument(doc['content'][-MAX_LENGTH+1:])
         data.append(doc['content'][-MAX_LENGTH+1:])
-    return data, vocab
+    return data
 
 def prepare_prediction_train(data, encoder, vocab):
-    #need to return [((input1, input2), 0/1)]
-    #so, we need to find pairs, and then  
+    """ Prepares the language and data for training on prediction network
+    @param data (list): list of patent documents from file
+    @param encoder (nn.Module): encoder model
+    @param vocab (Lang): language for training
 
+    returns data: list of documents to train
+    returns vocab: language
+    """
     patents_present = set()
     for p in data:
         patents_present.add(p['id'])
@@ -174,7 +182,11 @@ def prepare_prediction_train(data, encoder, vocab):
 
 """ ------------------------ TRAINING --------------------------  """
 
-data, vocab = prepare_train(train)
+
+
+vocab = prepare_vocab(patent_data)
+
+data = prepare_autoencoder_train(train)
 
 hidden_size = 256
 n_words = vocab.n_words

@@ -119,30 +119,18 @@ def train(input_tensor, target_tensor, encoder, decoder, e_optimizer, d_optimize
         encoder_output, encoder_hidden = encoder(
             input_tensor[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0, 0]
+
     if (verbose): print('encoded')
     decoder_input = torch.tensor([[0]], device=device)
 
     decoder_hidden = encoder_hidden
-    use_teacher_forcing = True
-    #use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
+  
+    for di in range(target_length):
+        decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden)
+        loss += criterion(decoder_output, target_tensor[di])
+        decoder_input = target_tensor[di]  # Teacher forcing
 
-    if use_teacher_forcing:
-        # Teacher forcing: Feed the target as the next input
-        for di in range(target_length):
-            decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden)
-            loss += criterion(decoder_output, target_tensor[di])
-            decoder_input = target_tensor[di]  # Teacher forcing
 
-    else:
-        # Without teacher forcing: use its own predictions as the next input
-        for di in range(target_length):
-            decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden)
-            topv, topi = decoder_output.topk(1)
-            decoder_input = topi.squeeze().detach()  # detach from history as input
-
-            loss += criterion(decoder_output, target_tensor[di])
-            if decoder_input.item() == EOS_token:
-                break
     if (verbose): print('decoded')
 
     loss.backward()
@@ -180,7 +168,6 @@ def trainIters(data, encoder, decoder, n_iters, lang,  print_every=100, plot_eve
     criterion = nn.NLLLoss()
 
     for iter in range(1, n_iters + 1):
-        #print(iter)
 
         training_pair = training_pairs[iter - 1]
         input_tensor = training_pair[0]
@@ -217,7 +204,12 @@ def trainIters(data, encoder, decoder, n_iters, lang,  print_every=100, plot_eve
 def _train(input_tensor1, input_tensor2, target, optimizer, predicter, criterion):
     """ Trains a forward pass over predicter network
 
-    @param 
+    @param input_tensor1: tensor of feature integers(dim = 256)
+    @param input_tensor2: tensor of feature integers(dim = 256)
+    @param target: target value (0/1)
+    @param optimizer: optimizer for network
+    @param predicter: predicter model
+    @param criterion: loss function (bceloss)
 
     returns: loss of forward pass through network
     """    
@@ -237,7 +229,11 @@ def _train(input_tensor1, input_tensor2, target, optimizer, predicter, criterion
 def trainPrediction(data, predicter, n_iters, print_every=100, learning_rate=0.005): 
     """ Trains a predicter network over n_iters
 
-    @param 
+    @param data: list of (input1, input2, target) tuples
+    @param predicter: predicter model
+    @param n_iters: number of iterations (integer)
+    @param print_every: iterations between print updates
+    @param learning_rate: lr for optimizer
 
     """  
     optimizer = optim.SGD(predicter.parameters(), lr=learning_rate)

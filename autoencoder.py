@@ -23,14 +23,13 @@ class encoder(nn.Module):
         Init Encoder.
 
         @param input_size (int): size of the vocab (for embedding)
-        @param hidden_size (int): hidden size of the rnn cell
-
+        @param hidden_size (int): hidden size of the lstm cell
         """
 
         super(encoder, self).__init__()
         self.hidden_size = hidden_size
         self.embedding = nn.Embedding(input_size, hidden_size)
-        self.cell = nn.GRU(hidden_size, hidden_size) # EXTENSION: add LSTM cell
+        self.cell = nn.RNN(hidden_size, hidden_size) # EXTENSION: add LSTM cell
 
     def forward(self, input, hidden):
         """ Forward pass of encoder
@@ -38,18 +37,14 @@ class encoder(nn.Module):
         @param input: tensor of integers
         @param hidden: internal state of the RNN before reading the input characters. 
 
-        @returns output: 
+        @returns output: output state of RNN
         @returns hidden: internal state of the RNN after reading the input characters. 
         """
-        #print("INPUT", input.size, "HIDDEN", hidden.size)
-        embedded = self.embedding(input).view(1, 1, -1)
-        #output, hidden = self.cell(output, hidden)
-        #print("output", output.size, "HIDDEN", hidden.size)
-        return self.cell(embedded, hidden) # output, hidden
+        embed = self.embedding(input).view(1, 1, -1)
+        return self.cell(embed, hidden) # output, hidden
 
     def initHidden(self):
         """ Initialize hidden state of RNN
-
         @returns: tensor of zeros, shape (1, 1, hidden_size)
         """
         return torch.zeros(1, 1, self.hidden_size, device=device)
@@ -66,7 +61,7 @@ class decoder(nn.Module):
         """
         super(decoder, self).__init__()
         self.embedding = nn.Embedding(output_size, hidden_size)
-        self.cell = nn.GRU(hidden_size, hidden_size) #LSTM??
+        self.cell = nn.RNN(hidden_size, hidden_size) #LSTM??
         self.out = nn.Linear(hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
 
@@ -75,11 +70,9 @@ class decoder(nn.Module):
 
         @param input: tensor of integers,
         @param hidden: internal state of the RNN before reading the input characters. 
-
-        @returns output: 
+        @returns output: output state of RNN
         @returns hidden: internal state of the RNN after reading the input characters. 
         """
-       	#print("INPUT", input.size, "HIDDEN", hidden.size)
         embed = F.relu(self.embedding(input).view(1, 1, -1))
         output, hidden = self.cell(embed, hidden)
         output = self.softmax(self.out(output[0]))

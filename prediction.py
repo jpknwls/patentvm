@@ -22,7 +22,8 @@ class predicter(nn.Module):
     def __init__(self, input_dim, output_dim):
         """ Init Predicter.
 
-        @param 
+        @param input_dim: dimensions of input to linear network (hidden_size)
+        @param output dim: dimensions of output from linear network (1)
         """
         super(predicter, self).__init__()
         self.features = nn.Sequential(nn.Conv1d(1, 1, kernel_size=3, stride=1, padding=1), nn.ReLU(inplace=True))

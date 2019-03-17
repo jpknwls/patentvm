@@ -94,6 +94,17 @@ def get_citations(patent, data):
             return d['citations']
 
 
+def get_content(patent, data):
+    for d in data:
+        if d['id'] == patent:
+            return d['content']
+
+
+def get_cluster():
+    sims = [[cos_sim(f, algo(p, docs)), p] for p in all_patents if p != patent]
+    
+
+
 """ ------------------------------------------------------------ """
 
 
@@ -116,7 +127,6 @@ def evaluate(data, patents, all_patents, docs, doc_txt, k):
         predictions = []
         for patent in patents:
             citations = get_citations(patent, data)
-        
             f = baseline(patent, docs, glove)  
             sims = [[cos_sim(f, algo(p, docs)), p] for p in all_patents if p != patent]
             top_k = np.argsort([s[0] for s in sims])[-k:]
@@ -126,6 +136,25 @@ def evaluate(data, patents, all_patents, docs, doc_txt, k):
             predictions.append(top_patents)
         MRRs.append(MRR(nodes, labels, predictions))
     
+
+
+    nodes = []
+    labels = []
+    predictions = []
+
+    for patent in patents:
+
+        citations = get_citations(patent, data)
+        p_content = get_content(patent, data)
+
+        sims = 
+
+        top_k = np.argsort(predicter())
+        top_patents = [sims[i][1] for i in top_k]     
+        nodes.append(patent)
+        labels.append(citations)
+        predictions.append(top_patents)
+
 
 
     return MRRs
